@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assignment Details</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .container {
+            max-width: 800px;
+            margin-top: 50px;
+        }
+        .card {
+            border-radius: 10px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .btn-upload {
+            width: 100%;
+        }
+        .alert-success {
+            text-align: center;
+            font-weight: bold;
+        }
+        .navbar {
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'student_dashboard' %}">Assignment Details</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{% url 'home' %}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Logout</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Assignment Details Card -->
+    <div class="container">
+        <div class="card p-4">
+            <h2 class="text-center text-primary">{{ assignment.title }}</h2>
+            <hr>
+            <p><strong>Description:</strong> {{ assignment.description }}</p>
+            <p><strong>Due Date:</strong> <span class="badge bg-danger">{{ assignment.due_date }}</span></p>
+            
+            {% if assignment.file %}
+               <p><strong>Assignment File:</strong>  
+                   <a href="{{ assignment.file.url }}" class="btn btn-success btn-sm" download target="_blank">Download</a>
+               </p>
+            {% else %}
+               <p class="text-danger">No file uploaded for this assignment.</p>
+            {% endif %}
+
+            <!-- Assignment Upload Form -->
+            
+                {% if submission %}
+                <p><strong>Submitted File:</strong> <a href="{{ submission.file.url }}" target="_blank">View Submission</a></p>
+                <form action="{% url 'delete_submission' submission.id %}" method="POST" onsubmit="return confirm('Are you sure you want to delete your submission?');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Delete Submission</button>
+                </form>
+            {% else %}
+               <form action="{% url 'upload_assignment' assignment.id %}" method="POST" enctype="multipart/form-data" id="uploadForm">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="file" class="form-label">Upload Assignment (PDF only):</label>
+                    <input type="file" class="form-control" id="file" name="file" accept=".pdf" required>
+                </div>
+                    <button type="submit" class="btn btn-primary btn-upload">Upload Assignment</button>
+                </form>
+            {% endif %}
+            
+            <!-- Error Message if Due Date Passed -->
+            <div id="dueDateMessage" class="alert alert-danger mt-3" style="display: none;">
+                ❌ The due date has passed. You can no longer submit this assignment.
+            </div>
+
+            <!-- Success Message Display -->
+            {% if messages %}
+            <div class="alert alert-success mt-3">
+                {% for message in messages %}
+                    {{ message }}
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var dueDateString = "{{ assignment.due_date|date:'Y-m-d' }}";
+            var dueDate = new Date(dueDateString);
+            var today = new Date();
+            
+            // Reset time to avoid issues with time zones
+            today.setHours(0, 0, 0, 0);
+            dueDate.setHours(0, 0, 0, 0);
+    
+            // Hide upload form if due date has passed
+            if (dueDate < today) {
+                document.getElementById("uploadForm").style.display = "none";
+                document.getElementById("dueDateMessage").style.display = "block";
+            }
+        });
+    </script>
+    
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

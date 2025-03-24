@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Assignment</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .container {
+            max-width: 600px;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-top: 40px;
+        }
+        .navbar-brand {
+            font-weight: bold;
+        }
+        .btn-primary {
+            width: 100%;
+            font-size: 18px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .form-label {
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ✅ Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{% url 'teacher_dashboard' %}">Dashboard</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'teacher_dashboard' %}">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link btn btn-danger text-white px-3" href="#">Logout</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- ✅ Assignment Form Container -->
+<div class="container">
+    <h2 class="text-center mb-4">Create Assignment</h2>
+
+    <!-- ✅ Success Message -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-success text-center">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="mb-3">
+            <label for="id_program" class="form-label">Program</label>
+            {{ form.program }}
+        </div>
+
+        <div class="mb-3">
+            <label for="id_course" class="form-label">Course</label>
+            {{ form.course }}
+        </div>
+
+       
+
+        <div class="mb-3">
+            <label for="id_title" class="form-label">Title</label>
+            {{ form.title }}
+        </div>
+
+        <div class="mb-3">
+            <label for="id_description" class="form-label">Description</label>
+            {{ form.description }}
+        </div>
+
+        <div class="mb-3">
+            <label for="id_due_date" class="form-label">Due Date</label>
+            {{ form.due_date }}
+        </div>
+
+        <div class="mb-3">
+            <label for="id_file" class="form-label">Upload File (PDF Only, Optional)</label>
+            {{ form.file }}
+        </div>
+
+         <!-- Display errors for due_date explicitly -->
+        {% if form.due_date.errors %}
+            <div style="color: red;">
+                {{ form.due_date.errors.0 }}
+            </div>
+        {% endif %}
+
+        <button type="submit" class="btn btn-primary">Create Assignment</button>
+    </form>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

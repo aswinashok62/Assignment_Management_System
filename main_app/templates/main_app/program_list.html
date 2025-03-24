@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Teachers</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            display: flex;
+        }
+        .sidebar {
+            width: 250px;
+            height: 100vh;
+            background-color: #343a40;
+            padding-top: 20px;
+        }
+        .sidebar a {
+            color: white;
+            padding: 10px;
+            display: block;
+            text-decoration: none;
+        }
+        .sidebar a:hover {
+            background-color: #495057;
+        }
+        .content {
+            flex-grow: 1;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h4 class="text-center text-white">Admin Panel</h4>
+        <a href="{% url 'admin_dashboard' %}">Home</a>
+        <a href="{% url 'add_program' %}">Add Programs</a>
+        <a href="#">Logout</a>
+    </div>
+
+    <!-- Content Area -->
+    <div class="content">
+        <!-- Navbar -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="{% url 'admin_dashboard' %}">Admin Dashboard</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Logout</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Alert Message -->
+        <div id="successMessage" class="alert alert-success d-none text-center" role="alert"></div>
+
+        <table class="table table-bordered table-striped">
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Program Name</th>
+                    <th>Program Code</th>
+                    <th>Duration (Years)</th>
+                    <th>Description</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for program in programs %}
+                <tr id="program-{{ program.id }}">
+                    <td>{{ program.id }}</td>
+                    <td>{{ program.program_name }}</td>
+                    <td>{{ program.program_code }}</td>
+                    <td>{{ program.duration }}</td>
+                    <td>{{ program.description|default:"N/A" }}</td>
+                    <td>
+                        <a href="{% url 'update_program' program.id %}" class="btn btn-warning btn-sm">Update</a>
+                        <button class="btn btn-danger btn-sm delete-program" data-id="{{ program.id }}">Delete</button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center">No programs available</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    <!-- Success Modal -->
+    <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="successModalLabel">Success</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="successModalBody">
+                    Program has been successfully updated!
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Include jQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        $(document).ready(function(){
+            // Handle the delete program button click event
+            $(".delete-program").click(function(){
+                let programId = $(this).data("id");
+                let row = $("#program-" + programId);
+
+                if(confirm("Are you sure you want to delete this program?")) {
+                    $.ajax({
+                        url: `/delete-program/${programId}/`,  // Make sure this matches the URL in urls.py
+                        type: "POST",
+                        data: {
+                            csrfmiddlewaretoken: "{{ csrf_token }}"
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                row.fadeOut(500, function() {
+                                    $(this).remove();
+                                    $("#successModalBody").text("Program deleted successfully!");
+                                    $("#successModal").modal("show");
+                                });
+                            } else {
+                                alert("Error deleting program!");
+                            }
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>
+
+
